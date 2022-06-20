@@ -1,0 +1,45 @@
+#!/bin/bash
+TOKEN="XXXXXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+CHAT_ID="XXXXXXXXX"
+URL="https://api.telegram.org/bot$TOKEN"
+HOSTNAME="*\[`hostname`\]*
+"
+
+esc_text(){
+  if [[ -n "${1}" ]];then
+    echo "${1}" | sed -e 's/[^a-zA-Z0-9]/\\&/g;'
+  fi
+}
+
+
+if [[ -n "${1}" ]];then
+  if [[ -n "${2}" ]];then
+    if [[ -f "${2}" ]];then
+      MSG="${1}"
+      FILE="${2}"
+    else
+      MSG="${1}
+File[no_exist]: ${2}"
+    fi
+  else
+    if [[ -f "${1}" ]];then
+      MSG=""
+      FILE="${1}"
+    else
+      MSG="${1}"
+    fi
+  fi
+
+
+  MSG="${HOSTNAME}$(esc_text "${MSG}")"
+
+  if [[ -n "${FILE}" ]];then
+    curl "${URL}/sendDocument" -F chat_id="${CHAT_ID}" -F parse_mode="MarkdownV2" -F caption="${MSG}" -F document=@"${FILE}" > /dev/null 2>&1
+  else
+    curl "${URL}/sendMessage" -d chat_id="${CHAT_ID}" -d parse_mode="MarkdownV2" -d text="${MSG}" > /dev/null 2>&1
+  fi
+fi
+
+
+exit 0
+
